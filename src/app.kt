@@ -4,7 +4,7 @@ import thread.*
 
 fun main() = buildGraph(trans, Variable(0, 0, 0) with listOf(object : LocalVar {} on P0))
     .let { graph ->
-        mark((Match("x=1") and Match("y>0")) or not(Match("z=0")) where listOf(
+        mark(("x=1" and "y>0") or not("z=0") where listOf(
             "x=1" denote { it.variable.x == 1 },
             "y>0" denote { it.variable.y > 0 },
             "z=0" denote { it.variable.z == 0 }

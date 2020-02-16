@@ -1,9 +1,22 @@
 package ctl
 
 fun not(it: Proposition) = Not(it)
+fun not(proposition: String) = Not(Match(proposition))
+
 infix fun Proposition.and(that: Proposition) = And(this, that)
+infix fun Proposition.and(that: String) = this and Match(that)
+infix fun String.and(that: Proposition) = Match(this) and that
+infix fun String.and(that: String) = Match(this) and Match(that)
+
 infix fun Proposition.or(that: Proposition) = Or(this, that)
+infix fun Proposition.or(that: String) = this or Match(that)
+infix fun String.or(that: Proposition) = Match(this) or that
+infix fun String.or(that: String) = Match(this) or Match(that)
+
 infix fun Proposition.imply(that: Proposition) = Imply(this, that)
+infix fun Proposition.imply(that: String) = this imply Match(that)
+infix fun String.imply(that: Proposition) = Match(this) imply that
+infix fun String.imply(that: String) = Match(this) imply Match(that)
 
 object True : R0 {
     override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> = listOf()
