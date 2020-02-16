@@ -1,25 +1,24 @@
 package ctl
 
-interface State
-
-interface Graph {
-    data class Edge(val from: State, val to: State)
+interface Graph<State> {
+    data class Edge<State>(val from: State, val to: State)
 
     val node: List<State>
-    val edge: List<Edge>
+    val edge: List<Edge<State>>
 }
 
-data class Label(val state: State, val proposition: Proposition)
+data class Label<State>(val state: State, val proposition: Proposition)
 
-class Inspection(val name: String, val matches: (State) -> Boolean)
+class Inspection<State>(val name: String, val matches: (State) -> Boolean)
 
-fun mark(proposition: Pair<Proposition, List<Inspection>>, g: Graph): List<Label> = proposition.let { (expression, inspections) ->
-    mutableListOf<Label>().also { labels ->
-        expression.expanded.forEach { proposition ->
-            labels += proposition.filter(g, inspections, labels).map { Label(it, proposition) }
+fun <State> mark(proposition: Pair<Proposition, List<Inspection<State>>>, g: Graph<State>): List<Label<State>> =
+    proposition.let { (expression, inspections) ->
+        mutableListOf<Label<State>>().also { labels ->
+            expression.expanded.forEach { proposition ->
+                labels += proposition.filter(g, inspections, labels).map { Label(it, proposition) }
+            }
         }
     }
-}
 
-infix fun Proposition.where(inspections: List<Inspection>) = Pair(this, inspections)
-infix fun String.denote(predicate: (State) -> Boolean) = Inspection(this, predicate)
+infix fun <State> Proposition.where(inspections: List<Inspection<State>>) = Pair(this, inspections)
+infix fun <State> String.denote(predicate: (State) -> Boolean) = Inspection(this, predicate)

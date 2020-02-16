@@ -19,27 +19,27 @@ infix fun String.imply(that: Proposition) = Match(this) imply that
 infix fun String.imply(that: String) = Match(this) imply Match(that)
 
 object True : R0 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> = listOf()
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> = listOf()
 }
 
 object False : R0 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> = listOf()
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> = listOf()
 }
 
 data class Match(val inspection: String) : R0 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         inspections.find { inspection == it.name }
             ?.let { inspection -> g.node.filter { inspection.matches(it) } } ?: listOf()
 }
 
 data class Not(override val proposition: Proposition) : R1 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         // 否定する述語 `proposition` でラベルづけされていない状態を抽出
         labels.labeled(proposition).let { ps -> g.node.filterNot { it in ps } }
 }
 
 data class And(override val l: Proposition, override val r: Proposition) : R2 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         labels.labeled(l).let { ls ->
             labels.labeled(r).let { rs ->
                 g.node.filter { (it in ls) and (it in rs) }
@@ -48,7 +48,7 @@ data class And(override val l: Proposition, override val r: Proposition) : R2 {
 }
 
 data class Or(override val l: Proposition, override val r: Proposition) : R2 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         labels.labeled(l).let { ls ->
             labels.labeled(r).let { rs ->
                 g.node.filter { (it in ls) or (it in rs) }
@@ -57,7 +57,7 @@ data class Or(override val l: Proposition, override val r: Proposition) : R2 {
 }
 
 data class Imply(override val l: Proposition, override val r: Proposition) : R2 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         labels.labeled(l).let { ls ->
             labels.labeled(r).let { rs ->
                 g.node.filter { (it !in ls) or (it in rs) }
@@ -66,17 +66,17 @@ data class Imply(override val l: Proposition, override val r: Proposition) : R2 
 }
 
 data class EX(override val proposition: Proposition) : R1 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         labels.labeled(proposition).let { ns ->
             g.edge.filter { it.to in ns }.map { it.from }
         }
 }
 
 data class EU(override val l: Proposition, override val r: Proposition) : R2 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> {
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> {
         val edgesFromL = g.edge.filter { it.from in labels.labeled(l) }
-        fun lsBoundFor(nodes: List<State>) = edgesFromL.filter { it.to in nodes }.map { it.from }
-        fun loop(nodes: List<State>): List<State> = lsBoundFor(nodes).minus(nodes).let {
+        fun lsBoundFor(nodes: List<S>) = edgesFromL.filter { it.to in nodes }.map { it.from }
+        fun loop(nodes: List<S>): List<S> = lsBoundFor(nodes).minus(nodes).let {
             if (it.isEmpty()) nodes else loop(nodes + it)
         }
         // r である状態と、これに連なる一連の l の状態を列挙する
@@ -85,10 +85,10 @@ data class EU(override val l: Proposition, override val r: Proposition) : R2 {
 }
 
 data class EG(override val proposition: Proposition) : R1 {
-    override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> {
-        fun nextTo(node: State): List<State> = g.edge.filter { node == it.from }.map { it.to }
-        fun outOfLinkFrom(nodes: List<State>) = nodes.filter { nextTo(it).intersect(nodes).isEmpty() }
-        fun loop(nodes: List<State>): List<State> = outOfLinkFrom(nodes).let {
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> {
+        fun nextTo(node: S): List<S> = g.edge.filter { node == it.from }.map { it.to }
+        fun outOfLinkFrom(nodes: List<S>) = nodes.filter { nextTo(it).intersect(nodes).isEmpty() }
+        fun loop(nodes: List<S>): List<S> = outOfLinkFrom(nodes).let {
             if (it.isEmpty()) nodes else loop(nodes - it)
         }
         // （リンク先に proposition がない状態を順次取り除いていくことで）
@@ -103,7 +103,7 @@ interface Proposition {
     val expanded: List<Proposition>
         get() = expand(listOf())
 
-    fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State>
+    fun <State> filter(g: Graph<State>, inspections: List<Inspection<State>>, labels: List<Label<State>>): List<State>
 }
 
 private fun Proposition.expand(expanded: List<Proposition>): List<Proposition> =
@@ -130,5 +130,5 @@ private interface R2 : Proposition {
         get() = listOf(l, r)
 }
 
-private fun List<Label>.labeled(proposition: Proposition): Set<State> =
+private fun <State> List<Label<State>>.labeled(proposition: Proposition): Set<State> =
     filter { proposition == it.proposition }.map { it.state }.toSet()
