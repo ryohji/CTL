@@ -1,5 +1,7 @@
 import Location.*
 import ctl.*
+import graph.Edge
+import graph.Link
 import thread.*
 
 fun main() = buildGraph(trans, SharedVar(0, 0, 0) with listOf(Unit on P0))
