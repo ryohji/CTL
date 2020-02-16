@@ -16,14 +16,14 @@ data class Transition<SharedVar, LocalVar>(val name: String, val arrow: Pair<Loc
     val boundTo get() = arrow.second
 }
 
-interface Edge<SharedVar, LocalVar> {
-    val state: SystemState<SharedVar, LocalVar>
+interface Edge<Node> {
+    val node: Node
 }
 
-data class Node<SharedVar, LocalVar>(override val state: SystemState<SharedVar, LocalVar>) : Edge<SharedVar, LocalVar>
-data class Link<SharedVar, LocalVar>(override val state: SystemState<SharedVar, LocalVar>, val boundTo: SystemState<SharedVar, LocalVar>) : Edge<SharedVar, LocalVar>
+data class Node<Node>(override val node: Node) : Edge<Node>
+data class Link<Node>(override val node: Node, val boundTo: Node) : Edge<Node>
 
-fun <SharedVar, LocalVar> buildGraph(transitions: List<Transition<SharedVar, LocalVar>>, initial: SystemState<SharedVar, LocalVar>): Set<Edge<SharedVar, LocalVar>> = mutableSetOf<Edge<SharedVar, LocalVar>>().also { graph ->
+fun <SharedVar, LocalVar> buildGraph(transitions: List<Transition<SharedVar, LocalVar>>, initial: SystemState<SharedVar, LocalVar>): Set<Edge<SystemState<SharedVar, LocalVar>>> = mutableSetOf<Edge<SystemState<SharedVar, LocalVar>>>().also { graph ->
     val frontier = mutableSetOf(initial)
     while (frontier.isNotEmpty()) {
         frontier.first().let { state ->
@@ -37,7 +37,7 @@ fun <SharedVar, LocalVar> buildGraph(transitions: List<Transition<SharedVar, Loc
                 }
             }.flatten().also { states ->
                 graph.addAll(if (states.isEmpty()) listOf(Node(state)) else states.map { Link(state, it) })
-                frontier.apply { addAll(states); removeAll(graph.map { it.state }) }
+                frontier.apply { addAll(states); removeAll(graph.map { it.node }) }
             }
         }
     }

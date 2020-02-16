@@ -28,7 +28,7 @@ private fun SharedVar.xAltered(x: Int) = SharedVar(x, y, z)
 private fun SharedVar.yAltered(y: Int) = SharedVar(x, y, z)
 private fun SharedVar.zAltered(z: Int) = SharedVar(x, y, z)
 
-private fun convert(graph: Collection<Edge<SharedVar, Unit>>): Graph<SystemState<SharedVar, Unit>> = object : Graph<SystemState<SharedVar, Unit>> {
-    override val node = graph.map { it.state }
-    override val edge = graph.filterIsInstance<Link<SharedVar, Unit>>().map { Graph.Edge(it.state, it.boundTo) }
+private fun convert(graph: Collection<Edge<SystemState<SharedVar, Unit>>>): Graph<SystemState<SharedVar, Unit>> = object : Graph<SystemState<SharedVar, Unit>> {
+    override val node = graph.map { it.node }
+    override val edge = graph.filterIsInstance<Link<SystemState<SharedVar, Unit>>>().map { Graph.Edge(it.node, it.boundTo) }
 }
