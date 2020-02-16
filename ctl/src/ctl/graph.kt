@@ -13,11 +13,13 @@ data class Label(val state: State, val proposition: Proposition)
 
 class Inspection(val name: String, val matches: (State) -> Boolean)
 
-fun mark(proposition: Proposition, g: Graph, inspections: List<Inspection>): List<Label> =
+fun mark(proposition: Pair<Proposition, List<Inspection>>, g: Graph): List<Label> = proposition.let { (expression, inspections) ->
     mutableListOf<Label>().also { labels ->
-        proposition.expanded.forEach { prop ->
-            labels += prop.filter(g, inspections, labels).map { Label(it, prop) }
+        expression.expanded.forEach { proposition ->
+            labels += proposition.filter(g, inspections, labels).map { Label(it, proposition) }
         }
     }
+}
 
+infix fun Proposition.where(inspections: List<Inspection>) = Pair(this, inspections)
 infix fun String.denote(predicate: (State) -> Boolean) = Inspection(this, predicate)

@@ -3,7 +3,13 @@ import ctl.*
 import thread.*
 
 fun main() = buildGraph(trans, Variable(0, 0, 0) with listOf(object : LocalVar {} on P0))
-    .let { mark((Match("x=1") and Match("y>0")) or not(Match("z=0")), convert(it), insps) }
+    .let { graph ->
+        mark((Match("x=1") and Match("y>0")) or not(Match("z=0")) where listOf(
+            "x=1" denote { it.variable.x == 1 },
+            "y>0" denote { it.variable.y > 0 },
+            "z=0" denote { it.variable.z == 0 }
+        ), convert(graph))
+    }
     .joinToString("\n")
     .let { println(it) }
 
@@ -28,11 +34,5 @@ private fun convert(graph: Collection<Edge>): Graph = object : Graph {
     override val node = graph.map { State(it.state) }
     override val edge = graph.filterIsInstance<Link>().map { Graph.Edge(State(it.state), State(it.boundTo)) }
 }
-
-private val insps = listOf(
-    "x=1" denote { it.variable.x == 1 },
-    "y>0" denote { it.variable.y > 0 },
-    "z=0" denote { it.variable.z == 0 }
-)
 
 private val ctl.State.variable get() = (this as State).s.shared as Variable
