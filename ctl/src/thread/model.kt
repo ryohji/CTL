@@ -1,30 +1,29 @@
 package thread
 
-data class SystemState<SharedVar>(val shared: SharedVar, val threadStates: List<ThreadState>)
-data class ThreadState(val location: Location, val variable: LocalVar)
+data class SystemState<SharedVar, LocalVar>(val shared: SharedVar, val threadStates: List<ThreadState<LocalVar>>)
+data class ThreadState<LocalVar>(val location: Location, val variable: LocalVar)
 
-infix fun <SharedVar> SharedVar.with(threadStates: List<ThreadState>) = SystemState(this, threadStates)
-infix fun LocalVar.on(location: Location) = ThreadState(location, this)
-infix fun <SharedVar> SharedVar.with(local: LocalVar) = Transition.Variable(this, local)
+infix fun <SharedVar, LocalVar> SharedVar.with(threadStates: List<ThreadState<LocalVar>>) = SystemState(this, threadStates)
+infix fun <LocalVar> LocalVar.on(location: Location) = ThreadState(location, this)
+infix fun <SharedVar, LocalVar> SharedVar.with(local: LocalVar) = Transition.Variable(this, local)
 
-interface LocalVar
 interface Location
 
-data class Transition<SharedVar>(val name: String, val arrow: Pair<Location, Location>, val apply: (Variable<SharedVar>) -> Variable<SharedVar>?) {
-    data class Variable<SharedVar>(val shared: SharedVar, val local: LocalVar)
+data class Transition<SharedVar, LocalVar>(val name: String, val arrow: Pair<Location, Location>, val apply: (Variable<SharedVar, LocalVar>) -> Variable<SharedVar, LocalVar>?) {
+    data class Variable<SharedVar, LocalVar>(val shared: SharedVar, val local: LocalVar)
 
     val location get() = arrow.first
     val boundTo get() = arrow.second
 }
 
-interface Edge<SharedVar> {
-    val state: SystemState<SharedVar>
+interface Edge<SharedVar, LocalVar> {
+    val state: SystemState<SharedVar, LocalVar>
 }
 
-data class Node<SharedVar>(override val state: SystemState<SharedVar>) : Edge<SharedVar>
-data class Link<SharedVar>(override val state: SystemState<SharedVar>, val boundTo: SystemState<SharedVar>) : Edge<SharedVar>
+data class Node<SharedVar, LocalVar>(override val state: SystemState<SharedVar, LocalVar>) : Edge<SharedVar, LocalVar>
+data class Link<SharedVar, LocalVar>(override val state: SystemState<SharedVar, LocalVar>, val boundTo: SystemState<SharedVar, LocalVar>) : Edge<SharedVar, LocalVar>
 
-fun <SharedVar> buildGraph(transitions: List<Transition<SharedVar>>, initial: SystemState<SharedVar>): Set<Edge<SharedVar>> = mutableSetOf<Edge<SharedVar>>().also { graph ->
+fun <SharedVar, LocalVar> buildGraph(transitions: List<Transition<SharedVar, LocalVar>>, initial: SystemState<SharedVar, LocalVar>): Set<Edge<SharedVar, LocalVar>> = mutableSetOf<Edge<SharedVar, LocalVar>>().also { graph ->
     val frontier = mutableSetOf(initial)
     while (frontier.isNotEmpty()) {
         frontier.first().let { state ->
