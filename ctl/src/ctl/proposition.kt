@@ -1,5 +1,7 @@
 package ctl
 
+import graph.*
+
 fun not(it: Proposition) = Not(it)
 fun not(proposition: String) = Not(Match(proposition))
 
@@ -68,14 +70,14 @@ data class Imply(override val l: Proposition, override val r: Proposition) : R2 
 data class EX(override val proposition: Proposition) : R1 {
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         labels.labeled(proposition).let { ns ->
-            g.edge.filter { it.to in ns }.map { it.from }
+            g.link.filter { it.boundTo in ns }.map { it.node }
         }
 }
 
 data class EU(override val l: Proposition, override val r: Proposition) : R2 {
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> {
-        val edgesFromL = g.edge.filter { it.from in labels.labeled(l) }
-        fun lsBoundFor(nodes: List<S>) = edgesFromL.filter { it.to in nodes }.map { it.from }
+        val edgesFromL = g.link.filter { it.node in labels.labeled(l) }
+        fun lsBoundFor(nodes: List<S>) = edgesFromL.filter { it.boundTo in nodes }.map { it.node }
         fun loop(nodes: List<S>): List<S> = lsBoundFor(nodes).minus(nodes).let {
             if (it.isEmpty()) nodes else loop(nodes + it)
         }
@@ -86,7 +88,7 @@ data class EU(override val l: Proposition, override val r: Proposition) : R2 {
 
 data class EG(override val proposition: Proposition) : R1 {
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> {
-        fun nextTo(node: S): List<S> = g.edge.filter { node == it.from }.map { it.to }
+        fun nextTo(node: S): List<S> = g.link.filter { node == it.node }.map { it.boundTo }
         fun outOfLinkFrom(nodes: List<S>) = nodes.filter { nextTo(it).intersect(nodes).isEmpty() }
         fun loop(nodes: List<S>): List<S> = outOfLinkFrom(nodes).let {
             if (it.isEmpty()) nodes else loop(nodes - it)
@@ -96,6 +98,9 @@ data class EG(override val proposition: Proposition) : R1 {
         return loop(g.node.filter { it in labels.labeled(proposition) })
     }
 }
+
+private val <S> Graph<S>.node get() = map { it.node }
+private val <S> Graph<S>.link get() = filterIsInstance<Link<S>>()
 
 interface Proposition {
     val subProposition: List<Proposition>
