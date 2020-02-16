@@ -3,6 +3,7 @@ import ctl.*
 import thread.*
 
 fun main() = buildGraph(trans, Variable(0, 0, 0) with listOf(object : LocalVar {} on P0))
+    .let { mark((Match("x=1") and Match("y>0")) or not(Match("z=0")), convert(it), insps) }
     .joinToString("\n")
     .let { println(it) }
 
@@ -20,3 +21,30 @@ private val trans = listOf(
 private fun SharedVar.xAltered(x: Int) = with(this as Variable) { Variable(x, y, z) }
 private fun SharedVar.yAltered(y: Int) = with(this as Variable) { Variable(x, y, z) }
 private fun SharedVar.zAltered(z: Int) = with(this as Variable) { Variable(x, y, z) }
+
+data class State(val s: SystemState) : ctl.State {
+    val variable: Variable
+        get() = s.shared as Variable
+}
+
+private fun convert(graph: Collection<Edge>): Graph = object : Graph {
+    override val node = graph.map { State(it.state) }
+    override val edge = graph.filterIsInstance<Link>().map { Graph.Edge(State(it.state), State(it.boundTo)) }
+}
+
+private val insps = listOf(
+    object : Inspection {
+        override val name = "x=1"
+        override fun matches(state: ctl.State) = state.variable.x == 1
+    },
+    object : Inspection {
+        override val name = "y>0"
+        override fun matches(state: ctl.State) = state.variable.y > 0
+    },
+    object : Inspection {
+        override val name = "z=0"
+        override fun matches(state: ctl.State) = state.variable.z == 0
+    }
+)
+
+private val ctl.State.variable get() = (this as State).variable

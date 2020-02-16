@@ -1,5 +1,10 @@
 package ctl
 
+fun not(it: Proposition) = Not(it)
+infix fun Proposition.and(that: Proposition) = And(this, that)
+infix fun Proposition.or(that: Proposition) = Or(this, that)
+infix fun Proposition.imply(that: Proposition) = Imply(this, that)
+
 object True : R0 {
     override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> = listOf()
 }
@@ -8,9 +13,9 @@ object False : R0 {
     override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> = listOf()
 }
 
-data class Match(val name: String) : R0 {
+data class Match(val inspection: String) : R0 {
     override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
-        inspections.find { name == it.name }?.let { g.node.filter(it::matches) } ?: listOf()
+        inspections.find { inspection == it.name }?.let { g.node.filter(it::matches) } ?: listOf()
 }
 
 data class Not(override val proposition: Proposition) : R1 {
