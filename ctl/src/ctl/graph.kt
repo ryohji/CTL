@@ -19,3 +19,5 @@ fun mark(proposition: Proposition, g: Graph, inspections: List<Inspection>): Lis
             labels += prop.filter(g, inspections, labels).map { Label(it, prop) }
         }
     }
+
+infix fun String.denote(predicate: (State) -> Boolean) = Inspection(this, predicate)

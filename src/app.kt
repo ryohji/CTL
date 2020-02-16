@@ -30,9 +30,9 @@ private fun convert(graph: Collection<Edge>): Graph = object : Graph {
 }
 
 private val insps = listOf(
-    Inspection("x=1") { it.variable.x == 1 },
-    Inspection("y>0") { it.variable.y > 0 },
-    Inspection("z=0") { it.variable.z == 0 }
+    "x=1" denote { it.variable.x == 1 },
+    "y>0" denote { it.variable.y > 0 },
+    "z=0" denote { it.variable.z == 0 }
 )
 
 private val ctl.State.variable get() = (this as State).s.shared as Variable
