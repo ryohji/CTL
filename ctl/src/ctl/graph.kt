@@ -11,10 +11,7 @@ interface Graph {
 
 data class Label(val state: State, val proposition: Proposition)
 
-interface Inspection {
-    val name: String
-    fun matches(state: State): Boolean
-}
+class Inspection(val name: String, val matches: (State) -> Boolean)
 
 fun mark(proposition: Proposition, g: Graph, inspections: List<Inspection>): List<Label> =
     mutableListOf<Label>().also { labels ->

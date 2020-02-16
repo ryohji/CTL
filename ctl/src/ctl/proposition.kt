@@ -15,7 +15,8 @@ object False : R0 {
 
 data class Match(val inspection: String) : R0 {
     override fun filter(g: Graph, inspections: List<Inspection>, labels: List<Label>): List<State> =
-        inspections.find { inspection == it.name }?.let { g.node.filter(it::matches) } ?: listOf()
+        inspections.find { inspection == it.name }
+            ?.let { inspection -> g.node.filter { inspection.matches(it) } } ?: listOf()
 }
 
 data class Not(override val proposition: Proposition) : R1 {

@@ -22,10 +22,7 @@ private fun SharedVar.xAltered(x: Int) = with(this as Variable) { Variable(x, y,
 private fun SharedVar.yAltered(y: Int) = with(this as Variable) { Variable(x, y, z) }
 private fun SharedVar.zAltered(z: Int) = with(this as Variable) { Variable(x, y, z) }
 
-data class State(val s: SystemState) : ctl.State {
-    val variable: Variable
-        get() = s.shared as Variable
-}
+data class State(val s: SystemState) : ctl.State
 
 private fun convert(graph: Collection<Edge>): Graph = object : Graph {
     override val node = graph.map { State(it.state) }
@@ -33,18 +30,9 @@ private fun convert(graph: Collection<Edge>): Graph = object : Graph {
 }
 
 private val insps = listOf(
-    object : Inspection {
-        override val name = "x=1"
-        override fun matches(state: ctl.State) = state.variable.x == 1
-    },
-    object : Inspection {
-        override val name = "y>0"
-        override fun matches(state: ctl.State) = state.variable.y > 0
-    },
-    object : Inspection {
-        override val name = "z=0"
-        override fun matches(state: ctl.State) = state.variable.z == 0
-    }
+    Inspection("x=1") { it.variable.x == 1 },
+    Inspection("y>0") { it.variable.y > 0 },
+    Inspection("z=0") { it.variable.z == 0 }
 )
 
-private val ctl.State.variable get() = (this as State).variable
+private val ctl.State.variable get() = (this as State).s.shared as Variable
