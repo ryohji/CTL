@@ -28,13 +28,15 @@ fun <SharedVar, LocalVar> buildGraph(transitions: List<Transition<SharedVar, Loc
             state.threadStates.mapIndexed { i, t ->
                 transitions.filter { t.location == it.location }.mapNotNull { transition ->
                     with(transition) {
-                        apply(state.shared with t.variable)?.let {
-                            it.shared with state.threadStates.alteredAt(i, it.local on boundTo)
+                        apply(state.shared with t.variable)?.let { (shared, local) ->
+                            (shared with state.threadStates.alteredAt(i, local on boundTo)).also {
+                                graph.add(Link(state, it, name))
+                            }
                         }
                     }
                 }
             }.flatten().also { states ->
-                graph.addAll(if (states.isEmpty()) listOf(Node(state)) else states.map { Link(state, it) })
+                if (states.isEmpty()) graph.add(Node(state))
                 frontier.apply { addAll(states); removeAll(graph.map { it.node }) }
             }
         }
