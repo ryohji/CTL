@@ -5,10 +5,14 @@ import graph.Graph
 import graph.Link
 import graph.Node
 
-data class SystemState<SharedVar, LocalVar>(val shared: SharedVar, val threadStates: List<ThreadState<LocalVar>>)
+data class SystemState<SharedVar, LocalVar>(val shared: SharedVar, val threadStates: List<ThreadState<LocalVar>>) {
+    override fun toString() = "$shared, $threadStates"
+}
 infix fun <SharedVar, LocalVar> SharedVar.with(threadStates: List<ThreadState<LocalVar>>) = SystemState(this, threadStates)
 
-data class ThreadState<LocalVar>(val location: Location, val variable: LocalVar)
+data class ThreadState<LocalVar>(val location: Location, val variable: LocalVar) {
+    override fun toString() = "$variable@$location"
+}
 infix fun <LocalVar> LocalVar.on(location: Location) = ThreadState(location, this)
 
 interface Location
