@@ -10,7 +10,10 @@ fun <Node> Graph<Node>.toDot(initial: Node, label: Collection<Label<Node>>): Str
         with(it) { "${states.indexOf(node)} -> ${states.indexOf(boundTo)} [label=\"$name\"]" }
     }
     val labels = states
-        .mapIndexed { i, state -> i to label.filter { state == it.state }.map { it.proposition } }
+        .mapIndexed { i, state ->
+            // remove `True` from annotation (True is given for all states).
+            i to label.filterNot { it.proposition == True }.filter { state == it.state }.map { it.proposition }
+        }
         .filter { it.second.isNotEmpty() }
         .map { (i, props) -> "l$i [label=\"${props.joinToString(",\\n")}\"]" to "l$i -> $i" }
         .unzip()

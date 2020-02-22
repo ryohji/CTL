@@ -10,7 +10,7 @@ fun main() = (SharedVar(1) with listOf(Nil on S)).let { initial ->
         Transition("", S to S) { if (it.shared.x == 6) it.xAltered(3) else null },
         Transition("", S to S) { if (it.shared.x == 9) it.xAltered(5) else null }
     ), initial)
-    val label = graph.mark(eg(True) or eg("x<=7") or eg("x>=4") where listOf(
+    val label = graph.mark(eg(True) and eg("x<=7") and eg("x>=4") where listOf(
         "x<=7" denote { it.shared.x <= 7 },
         "x>=4" denote { it.shared.x >= 4 }
     ))
