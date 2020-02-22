@@ -6,7 +6,7 @@ import graph.Link
 import graph.Node
 
 data class SystemState<SharedVar, LocalVar>(val shared: SharedVar, val threadStates: List<ThreadState<LocalVar>>) {
-    override fun toString() = "$shared, $threadStates"
+    override fun toString() = "$shared\n${threadStates.joinToString("\n")}"
 }
 infix fun <SharedVar, LocalVar> SharedVar.with(threadStates: List<ThreadState<LocalVar>>) = SystemState(this, threadStates)
 

@@ -22,7 +22,7 @@ fun <Node> Graph<Node>.toDot(initial: Node, label: Collection<Label<Node>>, emph
     return "digraph {\n" +
             "  s [shape=point];\n" +
             "  s -> ${states.indexOf(initial)};\n" +
-            "  ${nodes.joinToString(";\n  ")};\n" +
+            "  ${nodes.joinToString(";\n  ") { it.lines().joinToString("\\n") }};\n" +
             "  ${edges.joinToString(";\n  ")};\n" +
             "  node [shape=none];\n" +
             "  ${labels.first.joinToString(";\n  ")};\n" +
