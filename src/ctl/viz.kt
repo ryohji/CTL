@@ -3,9 +3,11 @@ package ctl
 import graph.Graph
 import graph.Link
 
-fun <Node> Graph<Node>.toDot(initial: Node, label: Collection<Label<Node>>): String {
+fun <Node> Graph<Node>.toDot(initial: Node, label: Collection<Label<Node>>) = toDot(initial, label) { false }
+
+fun <Node> Graph<Node>.toDot(initial: Node, label: Collection<Label<Node>>, emphasize: (Node) -> Boolean): String {
     val states = map(graph.Edge<Node>::node).toSet()
-    val nodes = states.mapIndexed { i, node -> "$i [label=\"$node\"]" }
+    val nodes = states.mapIndexed { i, node -> "$i [label=\"$node\"${if (emphasize(node)) " style=filled,fillcolor=palegreen" else ""}]" }
     val edges = filterIsInstance<Link<Node>>().map {
         with(it) { "${states.indexOf(node)} -> ${states.indexOf(boundTo)} [label=\"$name\"]" }
     }

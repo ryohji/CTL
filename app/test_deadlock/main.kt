@@ -17,9 +17,11 @@ fun main() = (SharedVar(Free, Free) with listOf(Nil on P0, Nil on Q0)).let { ini
         Transition("Q.free 0", Q2 to Q3) { it.freed0() },
         Transition("Q.free 1", Q3 to Q0) { it.freed1() }
     ), initial)
-    // IF THERE IS ANY NEXT TRANSITION STATE, EX true is true. So `not EX true` detects deadlock.
-    val label = graph.mark(not (EX(True)))
-    println(graph.toDot(initial, label))
+    // FOR STATE HAVING ANY NEXT TRANSITION, `EX true` IS `true`. So `not EX true` detects deadlock.
+    val proposition = not(EX(True))
+    val label = graph.mark(proposition)
+    val targetStates = label.filter { it.proposition == proposition }.map { it.state }
+    println(graph.toDot(initial, label) { state -> state in targetStates })
 }
 
 private enum class Location : thread.Location { P0, P1, P2, P3, Q0, Q1, Q2, Q3 }
