@@ -20,6 +20,9 @@ infix fun Proposition.imply(that: String) = this imply Match(that)
 infix fun String.imply(that: Proposition) = Match(this) imply that
 infix fun String.imply(that: String) = Match(this) imply Match(that)
 
+fun ex(proposition: Proposition) = EX(proposition)
+fun ex(proposition: String) = ex(Match(proposition))
+
 object True : R0 {
     override fun toString() = "True"
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> = listOf()
@@ -38,7 +41,7 @@ data class Match(val inspection: String) : R0 {
 }
 
 data class Not(override val proposition: Proposition) : R1 {
-    override fun toString() = "not($proposition)"
+    override fun toString() = "(not $proposition)"
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         // 否定する述語 `proposition` でラベルづけされていない状態を抽出
         labels.labeled(proposition).let { ps -> g.node.filterNot { it in ps } }
@@ -75,7 +78,7 @@ data class Imply(override val l: Proposition, override val r: Proposition) : R2 
 }
 
 data class EX(override val proposition: Proposition) : R1 {
-    override fun toString() = "EX $proposition"
+    override fun toString() = "(EX $proposition)"
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> =
         labels.labeled(proposition).let { ns ->
             g.link.filter { it.boundTo in ns }.map { it.node }
@@ -83,7 +86,7 @@ data class EX(override val proposition: Proposition) : R1 {
 }
 
 data class EU(override val l: Proposition, override val r: Proposition) : R2 {
-    override fun toString() = "E $l U $r"
+    override fun toString() = "(E $l U $r)"
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> {
         val edgesFromL = g.link.filter { it.node in labels.labeled(l) }
         fun lsBoundFor(nodes: List<S>) = edgesFromL.filter { it.boundTo in nodes }.map { it.node }
@@ -96,7 +99,7 @@ data class EU(override val l: Proposition, override val r: Proposition) : R2 {
 }
 
 data class EG(override val proposition: Proposition) : R1 {
-    override fun toString() = "EG $proposition"
+    override fun toString() = "(EG $proposition)"
     override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: List<Label<S>>): List<S> {
         fun nextTo(node: S): List<S> = g.link.filter { node == it.node }.map { it.boundTo }
         fun outOfLinkFrom(nodes: List<S>) = nodes.filter { nextTo(it).intersect(nodes).isEmpty() }

@@ -1,11 +1,17 @@
-import Location.*
+package app.test1
+
+import app.test1.Location.*
 import ctl.*
 import thread.Transition
 import thread.buildGraph
 import thread.on
 import thread.with
 
-fun main() = (SharedVar(0, 0, 0) with listOf(Nil on P0)).let { initial ->
+fun main() = (SharedVar(
+    0,
+    0,
+    0
+) with listOf(Nil on P0)).let { initial ->
     val graph = buildGraph(trans, initial)
     val label = graph.mark(("x=1" and "y>0") or not("z=0") where listOf(
         "x=1" denote { it.shared.x == 1 },
@@ -15,13 +21,13 @@ fun main() = (SharedVar(0, 0, 0) with listOf(Nil on P0)).let { initial ->
     println(graph.toDot(initial, label))
 }
 
-enum class Location : thread.Location { P0, P1, P2, P3, P4 }
+private enum class Location : thread.Location { P0, P1, P2, P3, P4 }
 
-data class SharedVar(val x: Int, val y: Int, val z: Int) {
+private data class SharedVar(val x: Int, val y: Int, val z: Int) {
     override fun toString() = "(x=$x y=$y z=$z)"
 }
 
-object Nil {
+private object Nil {
     override fun toString() = "()"
 }
 
