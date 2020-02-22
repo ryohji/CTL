@@ -28,9 +28,12 @@ fun eu(until: String, then: Proposition) = eu(Match(until), then)
 fun eu(until: Proposition, then: String) = eu(until, Match(then))
 fun eu(until: String, then: String) = eu(Match(until), Match(then))
 
+fun eg(proposition: Proposition) = EG(proposition)
+fun eg(proposition: String) = eg(Match(proposition))
+
 object True : R0 {
     override fun toString() = "True"
-    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: Collection<Label<S>>): List<S> = listOf()
+    override fun <S> filter(g: Graph<S>, inspections: List<Inspection<S>>, labels: Collection<Label<S>>): List<S> = g.node
 }
 
 object False : R0 {
