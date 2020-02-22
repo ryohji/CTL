@@ -17,11 +17,9 @@ infix fun <LocalVar> LocalVar.on(location: Location) = ThreadState(location, thi
 
 interface Location
 
-data class Transition<SharedVar, LocalVar>(val name: String, val arrow: Pair<Location, Location>, val apply: (Variable<SharedVar, LocalVar>) -> Variable<SharedVar, LocalVar>?) {
+data class Transition<SharedVar, LocalVar>(val name: String, val location: Location, val boundTo: Location, val apply: (Variable<SharedVar, LocalVar>) -> Variable<SharedVar, LocalVar>?) {
     data class Variable<SharedVar, LocalVar>(val shared: SharedVar, val local: LocalVar)
-
-    val location get() = arrow.first
-    val boundTo get() = arrow.second
+    constructor(name: String, arrow: Pair<Location, Location>, apply: (Variable<SharedVar, LocalVar>) -> Variable<SharedVar, LocalVar>?): this(name, arrow.first, arrow.second, apply)
 }
 infix fun <SharedVar, LocalVar> SharedVar.with(local: LocalVar) = Transition.Variable(this, local)
 
