@@ -3,7 +3,7 @@ package ctl
 import graph.Graph
 import graph.Link
 
-fun <Node> Graph<Node>.toDot(initial: Node, label: List<Label<Node>>): String {
+fun <Node> Graph<Node>.toDot(initial: Node, label: Collection<Label<Node>>): String {
     val states = map(graph.Edge<Node>::node).toSet()
     val nodes = states.mapIndexed { i, node -> "$i [label=\"$node\"]" }
     val edges = filterIsInstance<Link<Node>>().map {

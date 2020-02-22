@@ -7,9 +7,9 @@ data class Label<State>(val state: State, val proposition: Proposition)
 class Inspection<State>(val name: String, val matches: (State) -> Boolean)
 infix fun <State> String.denote(predicate: (State) -> Boolean) = Inspection(this, predicate)
 
-fun <State> Graph<State>.mark(proposition: Pair<Proposition, List<Inspection<State>>>): List<Label<State>> =
+fun <State> Graph<State>.mark(proposition: Pair<Proposition, List<Inspection<State>>>): Set<Label<State>> =
     proposition.let { (expression, inspections) ->
-        mutableListOf<Label<State>>().also { labels ->
+        mutableSetOf<Label<State>>().also { labels ->
             expression.expanded.forEach { proposition ->
                 labels += proposition.filter(this, inspections, labels).map { Label(it, proposition) }
             }
